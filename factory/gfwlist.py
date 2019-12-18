@@ -121,7 +121,7 @@ def filtrate_rules_bypass(rules):
         #     split_ret = rule.split('/')
         #     rule = split_ret[0]
 
-        if (not re.match('^[\w.-]+$', rule)) or ('/' in rule):
+        if (not re.match('^[\w.-]+$', rule)) or ('/' in rule) or ('ampproject.org' in rule):
             unhandle_rules_bypass.append(rule0)
             continue
 
