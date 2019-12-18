@@ -5,7 +5,7 @@ search.xxx
 50.7.31.230
 blogspot
 google
-akamaihd.net
+# akamaihd.net
 azurewebsites.net
 # /twimg\.edgesuite\.net\/\/?appledaily
 4sqi.net
@@ -43,3 +43,4 @@ phobos
 
 # hacker news web site
 news.ycombinator.com
+

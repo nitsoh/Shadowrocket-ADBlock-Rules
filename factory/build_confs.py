@@ -7,15 +7,15 @@ import time
 # confs names in template/ and ../
 # except sr_head and sr_foot
 confs_names = [
-    'sr_top500_banlist_ad',
-    'sr_top500_banlist',
-    'sr_top500_whitelist_ad',
-    'sr_top500_whitelist',
-    'sr_adb',
-    'sr_direct_banad',
-    'sr_proxy_banad',
-    'sr_cnip', 'sr_cnip_ad',
-    'sr_backcn', 'sr_backcn_ad'
+    # 'sr_top500_banlist_ad',
+    'sr_top500_banlist'
+    # 'sr_top500_whitelist_ad',
+    # 'sr_top500_whitelist',
+    # 'sr_adb',
+    # 'sr_direct_banad',
+    # 'sr_proxy_banad',
+    # 'sr_cnip', 'sr_cnip_ad',
+    # 'sr_backcn', 'sr_backcn_ad'
 ]
 
 
@@ -32,13 +32,13 @@ def getRulesStringFromFile(path, kind):
         if content.startswith('#'):
             ret += content + '\n'
         else:
-            prefix = 'DOMAIN-SUFFIX'
+            prefix = 'HOST-SUFFIX'
             if re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', content):
                 prefix = 'IP-CIDR'
                 if '/' not in content:
                     content += '/32'
             elif '.' not in content:
-                prefix = 'DOMAIN-KEYWORD'
+                prefix = 'HOST-KEYWORD'
 
             ret += prefix + ',%s,%s\n' % (content, kind)
 
@@ -46,8 +46,8 @@ def getRulesStringFromFile(path, kind):
 
 
 # get head and foot
-str_head = open('template/sr_head.txt', 'r', encoding='utf-8').read()
-str_foot = open('template/sr_foot.txt', 'r', encoding='utf-8').read()
+# str_head = open('template/sr_head.txt', 'r', encoding='utf-8').read()
+# str_foot = open('template/sr_foot.txt', 'r', encoding='utf-8').read()
 
 
 # make values
@@ -55,16 +55,17 @@ values = {}
 
 values['build_time'] = time.strftime("%Y-%m-%d %H:%M:%S")
 
-values['top500_proxy']  = getRulesStringFromFile('resultant/top500_proxy.list', 'Proxy')
-values['top500_direct'] = getRulesStringFromFile('resultant/top500_direct.list', 'Direct')
+# values['top500_proxy']  = getRulesStringFromFile('resultant/top500_proxy.list', 'Proxy')
+# values['top500_direct'] = getRulesStringFromFile('resultant/top500_direct.list', 'Direct')
 
-values['ad'] = getRulesStringFromFile('resultant/ad.list', 'Reject')
+# values['ad'] = getRulesStringFromFile('resultant/ad.list', 'Reject')
 
-values['manual_direct'] = getRulesStringFromFile('manual_direct.txt', 'Direct')
-values['manual_proxy']  = getRulesStringFromFile('manual_proxy.txt', 'Proxy')
-values['manual_reject'] = getRulesStringFromFile('manual_reject.txt', 'Reject')
+# values['manual_direct'] = getRulesStringFromFile('manual_direct.txt', 'Direct')
+# values['manual_proxy']  = getRulesStringFromFile('manual_proxy.txt', 'Proxy')
+# values['manual_reject'] = getRulesStringFromFile('manual_reject.txt', 'Reject')
 
-values['gfwlist'] = getRulesStringFromFile('resultant/gfw.list', 'Proxy') \
+values['gfwlist'] = getRulesStringFromFile('resultant/gfw_bypass.list', 'Direct') \
+                  + getRulesStringFromFile('resultant/gfw.list', 'Proxy') \
                   + getRulesStringFromFile('manual_gfwlist.txt', 'Proxy')
 
 
@@ -73,7 +74,7 @@ for conf_name in confs_names:
     file_template = open('template/'+conf_name+'.txt', 'r', encoding='utf-8')
     template = file_template.read()
 
-    template = str_head + template + str_foot
+    # template = str_head + template + str_foot
 
     file_output = open('../'+conf_name+'.conf', 'w', encoding='utf-8')
 
@@ -83,3 +84,4 @@ for conf_name in confs_names:
         template = template.replace('{{'+mark+'}}', values[mark])
 
     file_output.write(template)
+

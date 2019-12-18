@@ -2,7 +2,8 @@
 
 #
 # 下载并解析最新版本的 GFWList
-# 对于混合性质的网站，尽量走代理（忽略了所有的@@指令）
+# 忽略混合性质的网站
+# 对于@@指定的站点，单独列出
 #
 
 
@@ -15,6 +16,7 @@ import base64
 rules_url = 'https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt'
 
 unhandle_rules = []
+unhandle_rules_bypass = []
 
 
 def get_rule(rules_url):
@@ -63,6 +65,27 @@ def clear_format(rule):
 
     return rules
 
+def clear_format_bypass(rule):
+    rules_bypass = []
+
+    rule = rule.split('\n')
+    for row in rule:
+        row = row.strip()
+
+        if row.startswith('@@'):
+
+            # 清除前缀
+            row = row.lstrip('@')
+            row = re.sub(r'^\|?https?://', '', row)
+            row = re.sub(r'^\|\|', '', row)
+            row = row.lstrip('.*')
+
+            # 清除后缀 
+            row = row.rstrip('/^*')
+
+            rules_bypass.append(row)
+
+    return rules_bypass
 
 def filtrate_rules(rules):
     ret = []
@@ -71,11 +94,12 @@ def filtrate_rules(rules):
         rule0 = rule
 
         # only hostname
-        if '/' in rule:
-            split_ret = rule.split('/')
-            rule = split_ret[0]
+        # if '/' in rule:
+        #     split_ret = rule.split('/')
+        #     rule = split_ret[0]
 
-        if not re.match('^[\w.-]+$', rule):
+        # 不考虑混合性质的站点
+        if (not re.match('^[\w.-]+$', rule)) or ('/' in rule):
             unhandle_rules.append(rule0)
             continue
 
@@ -86,7 +110,27 @@ def filtrate_rules(rules):
 
     return ret
 
+def filtrate_rules_bypass(rules):
+    ret = []
 
+    for rule in rules:
+        rule0 = rule
+
+        # only hostname
+        # if '/' in rule:
+        #     split_ret = rule.split('/')
+        #     rule = split_ret[0]
+
+        if (not re.match('^[\w.-]+$', rule)) or ('/' in rule):
+            unhandle_rules_bypass.append(rule0)
+            continue
+
+        ret.append(rule)
+
+    ret = list( set(ret) )
+    ret.sort()
+
+    return ret
 
 # main
 
@@ -96,8 +140,22 @@ rules = clear_format(rule)
 
 rules = filtrate_rules(rules)
 
+rules_bypass = clear_format_bypass(rule)
+
+rules_bypass = filtrate_rules_bypass(rules_bypass)
+
+# 保存原始 gfwlist
+open('resultant/gfwlist.txt', 'w', encoding='utf-8') \
+    .write(rule)
+
 open('resultant/gfw.list', 'w', encoding='utf-8') \
     .write('\n'.join(rules))
 
+open('resultant/gfw_bypass.list', 'w', encoding='utf-8') \
+    .write('\n'.join(rules_bypass))
+
 open('resultant/gfw_unhandle.log', 'w', encoding='utf-8') \
     .write('\n'.join(unhandle_rules))
+
+open('resultant/gfw_unhandle_bypass.log', 'w', encoding='utf-8') \
+    .write('\n'.join(unhandle_rules_bypass))
